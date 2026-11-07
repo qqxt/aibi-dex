@@ -5,8 +5,6 @@
 [![Release](https://img.shields.io/github/v/release/qqxt/aibi-dex?style=flat-square&color=2e6b5e)](https://github.com/qqxt/aibi-dex/releases)
 [![Stars](https://img.shields.io/github/stars/qqxt/aibi-dex?style=flat-square&color=0071e3)](https://github.com/qqxt/aibi-dex/stargazers)
 
-> 把上面四处 `qqxt/aibi-dex` 换成你自己的仓库，徽章才会亮。
-
 「艾比手册」小程序资料的查询站。首页左侧是筛选（属性 / 稀有度 / 定位，带数量）+ 评级阶梯图 + 资料列表，点进去是单只艾比的完整档案：立绘、评级与票数、资质成长五维、糖果偏好、信物与掉落方式、专属技能、通用技能、资质果、上架状态与简介。
 
 视觉走 iOS 分组列表那一套：半透明顶栏、白卡片配柔和阴影、行内分隔线、评级用胶囊、唯一的强调色只出现在「要做的事」上（搜索按钮、选中态）。详情页是「对象头 + 左速览 + 右内容流」两栏：头卡放封面、名字、属性、评级块和几条高亮 chip，左边 sticky 速览（五维、糖果），右边是信物、技能、简介、基础资料长文。动效遵循 Apple 的手感：按下即反馈、抽屉 1:1 跟手、松手按手指速度做动量投影、可反向取消、动画从当前屏幕值出发而不是从头播放。
@@ -170,9 +168,9 @@ php build\import.php --keep         # 跳过数据库里已存在的名字，只
 - 票数 / 评级是快照（不是实时），刷新见上面「刷新票数与评级」。
 - **换季**：接口的 `totalVotes` 是「本赛季」票数，新赛季一来会清零重算。`export.py --votes-only` 会比对 `data.seasonStart`，发现换季就自动把上赛季最终票数写进 `votes_prev`、赛季号 +1（第十三赛季 → 第十四赛季），所以「较上赛季」一直有意义。这次换季就发生在 2026-10-02 之后：芬里尔上赛季 972 票，本赛季从 0 重新计，现在是 231 票。
 
-## 对比度与圆角（impeccable 收口）
+## 对比度与圆角（定稿时改过的值）
 
-页面定稿后跑过一轮 impeccable 的确定性检查（`impeccable detect <url>`），改掉的是这些：
+页面定稿后按「对比度 / 圆角 / 行宽 / 间距」逐项量过一遍，改掉的是这些：
 
 | 位置 | 原值 | 现用 | 原因 |
 | --- | --- | --- | --- |
@@ -186,7 +184,7 @@ php build\import.php --keep         # 跳过数据库里已存在的名字，只
 | 卡片圆角 `--r-lg` | `18px` | `16px` | 卡片圆角惯例 12–16px |
 | 正文行宽 | 不限 | `.de-main .prose p` / `.skill p` 收 68ch | 一行 90+ 字读起来累 |
 
-改完两页 `detect` 都是 0 anti-pattern、0 advisory；`design-taste-frontend` 的 `inspect --app` 仍是列表 0 FAIL / 详情 0 FAIL + 1 条 `ragged-row` 取舍。
+改完两页都没有对比度违例；布局检查列表页全部通过，详情页只剩一条「同一行卡片底边不等高」的提示——这是刻意的，同排面板内容长度本来就不同，强行等高会在短面板里留大片空白。
 
 ## 交互与无障碍
 
