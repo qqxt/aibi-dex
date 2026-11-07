@@ -208,6 +208,27 @@ php build\import.php --keep         # 跳过数据库里已存在的名字，只
 - **改 `detail.php` 别用 `<main class="wrap" id="main">` 做定位**：这个文件里 404 分支也有一个 `<main>`，`content.index()` 会命中前面那个，结果新布局被塞进 404 分支、页面里出现两份完整 HTML。要么按行号切片，要么先把 404 分支换成不含 `<main>` 的写法。
 - **截图别用 Edge 的 `--window-size=430` 判断手机布局**：Edge headless 有 ~500px 最小布局宽度，430 是裁切。真实 390 布局要用能设 `deviceMetrics` 覆盖的无头浏览器（Playwright / CDP），截出来才是真机布局。
 
+## 常见问题
+
+**票数为什么是「快照」，怎么更新？**
+站点运行时不联网，票数和评级是导入那一刻的快照，会随时间过期。想刷新只动这两列：
+
+```bash
+python build/export.py --votes-only
+php build/import.php --votes-only
+```
+
+五维、信物、技能、简介和后台手改的内容都不会被覆盖，可以反复跑；刷新时间会写进详情页「数据快照」那一行。
+
+**后台密码忘了？**
+删掉 `data/admin.json`，再打开 `/admin/` 就会回到「设置密码」页，重新设一个即可。密码只存 `password_hash` 结果。
+
+**重新导入会不会冲掉我手改的字段？**
+会。`php build/import.php` 默认清空重灌；加 `--keep` 则只补库里还没有的名字，已存在的记录整体跳过。
+
+**图片和资料能商用吗？**
+代码是 MIT，但 `img/` 里的立绘与 `data/aibi.db` 里的资料来自游戏与小程序的公开接口，**不在授权范围内**，商用或再分发请自行取得授权。
+
 ---
 
 ## 版权与数据来源
