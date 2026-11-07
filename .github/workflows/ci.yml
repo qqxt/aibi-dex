@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: PHP 语法
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_sqlite, sqlite3
+          coverage: none
+
+      - name: php -l 全量检查
+        run: |
+          fail=0
+          while IFS= read -r f; do
+            php -l "$f" > /dev/null || { echo "语法错误: $f"; fail=1; }
+          done < <(find . -name '*.php' -not -path './.git/*')
+          exit $fail
+
+  regress:
+    name: 站点回归
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_sqlite, sqlite3
+          coverage: none
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 启动内置服务器
+        run: |
+          php -S 127.0.0.1:8099 -t . > server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8099/ > /dev/null; then echo "server up"; exit 0; fi
+            sleep 1
+          done
+          echo "server 起不来"; cat server.log; exit 1
+
+      - name: 全量回归（184 详情页 / 194 图 / 筛选 / 分页 / 404 / 静态资源）
+        env:
+          AIBI_BASE: http://127.0.0.1:8099
+        run: python build/_regress.py
+
+      - name: 失败时留日志
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-log
+          path: server.log
+          if-no-files-found: ignore

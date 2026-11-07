@@ -1,0 +1,34 @@
+# 本机与临时产物
+.taste-skill/
+build/shots/
+build/cache/
+server.log
+*.log
+
+# 后台密码（本机用 /admin/ 首访设置，绝不进仓库）
+data/admin.json
+data/*.db-wal
+data/*.db-shm
+
+# 抓素材的原始输出与个人内容（体积大 / 与项目无关，可由脚本重建）
+wx_assets/out/
+essay/
+
+# 系统垃圾
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Web 面板自带的错误页（不是我写的，且只有本机才有）
+error/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 本机截图辅助脚本（依赖本地 skill 安装，不进仓库）
+build/_shots.mjs
+
+# 一次性脚本（保留 build/_regress.py，CI 要用）
+build/_*.py
+!build/_regress.py
